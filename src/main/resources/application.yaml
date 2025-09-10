@@ -16,6 +16,31 @@ spring:
   liquibase:
     change-log: classpath:db/changelog/db.changelog-master.yaml
 
+  kafka:
+    bootstrap-servers: localhost:9092
+    group-id: user_service
+    properties:
+      schema.registry.url: http://localhost:8081
+    consumer:
+      key-deserializer: org.apache.kafka.common.serialization.StringDeserializer
+      value-deserializer: io.confluent.kafka.serializers.KafkaAvroDeserializer
+      group-id: user_service
+      properties:
+        specific.avro.reader: true
+    producer:
+      key-serializer: org.apache.kafka.common.serialization.StringSerializer
+      value-serializer: io.confluent.kafka.serializers.KafkaAvroSerializer
+      properties:
+        value.subject.name.strategy: io.confluent.kafka.serializers.subject.RecordNameStrategy
+      retry-max-attempts: 3
+      retry-backoff-ms: 1000
+    topics:
+      user-create:
+        name: users.create
+      user-update:
+        name: users.update
+      recommendationReceived: recommendation-received-topic
+
   data:
     redis:
       port: 6379
@@ -37,6 +62,32 @@ payment-service:
   port: 9080
 
 user:
+  goal:
+    limit-active: 2
   password:
     min:
       length: 6
+
+Mentorship:
+  min:
+    months-between-requests: 3
+
+skill:
+  min-offers-required: 3
+  
+recommendation:
+  delay:
+    min:
+      months: 6
+
+jwt:
+  access:
+    secret: fe36efc1dc7ed4e847bba155b7932318f2729c68428c891f90de21849851aa4a
+    expiration: 600000
+  refresh:
+    secret: fe36efc1dc7ed4e847bba155b7932318f2729c68428c891f90de21849851aa4a
+    expiration: 604800000
+    
+date:
+  time:
+    out: 6
