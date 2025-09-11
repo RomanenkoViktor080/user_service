@@ -34,7 +34,6 @@ import school.faang.user_service.repository.user.UserSkillGuaranteeRepository;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
-import java.util.Optional;
 
 @Slf4j
 @Service
@@ -112,17 +111,14 @@ public class GoalServiceImpl implements GoalService {
         Goal goal = goalRepository.getByIdOrThrow(id);
         goalUpdatePolicy.validate(updateGoalDto, goal);
 
-        Optional.ofNullable(updateGoalDto.mentorId())
-                .ifPresent(mentorId -> {
-                    User mentor = userRepository.getByIdOrThrow(mentorId);
-                    goal.setMentor(mentor);
-                });
-
-        Optional.ofNullable(updateGoalDto.skillIds())
-                .ifPresent(skillIds -> {
-                    List<Skill> skills = skillRepository.findAllById(skillIds);
-                    goal.setSkillsToAchieve(skills);
-                });
+        if (updateGoalDto.mentorId() != null) {
+            User mentor = userRepository.getByIdOrThrow(updateGoalDto.mentorId());
+            goal.setMentor(mentor);
+        }
+        if (updateGoalDto.skillIds() != null) {
+            List<Skill> skills = skillRepository.findAllById(updateGoalDto.skillIds());
+            goal.setSkillsToAchieve(skills);
+        }
 
         goalMapper.update(goal, updateGoalDto);
 
