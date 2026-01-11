@@ -1,33 +1,14 @@
 package school.faang.user_service.service.user;
 
 import org.springframework.security.core.userdetails.UserDetailsService;
-import school.faang.user_service.dto.user.CreateUserDto;
 import school.faang.user_service.dto.user.UpdateUserDto;
 import school.faang.user_service.dto.user.UserDto;
-
-import java.util.List;
 
 /**
  * Сервис для управления пользователями.
  * Предоставляет методы для создания, обновления и получения информации о пользователях.
  */
 public interface UserService extends UserDetailsService {
-
-    /**
-     * Создаёт нового пользователя на основе переданных данных.
-     * <p>
-     * Условия:
-     * <ul>
-     *     <li>Email должен быть уникальным —
-     *         в противном случае выбрасывается {@code DataIntegrityViolationException}.</li>
-     *     <li>Пароль должен удовлетворять требованиям к длине —
-     *         при нарушении выбрасывается {@code DataValidationException}.</li>
-     * </ul>
-     *
-     * @param userDto объект {@link CreateUserDto}, содержащий информацию для создания пользователя
-     * @return объект {@link UserDto}, представляющий созданного пользователя
-     */
-    UserDto create(CreateUserDto userDto);
 
     /**
      * Обновляет информацию о существующем пользователе.
@@ -61,8 +42,6 @@ public interface UserService extends UserDetailsService {
      */
 
     UserDto getUser(long userId);
-
-    List<UserDto> getUsersByIds(List<Long> userIds);
 
     UserDto deactivateUserById(Long userId);
 }

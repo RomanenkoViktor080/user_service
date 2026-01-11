@@ -7,13 +7,11 @@ import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.stereotype.Service;
 import school.faang.user_service.config.context.AuthUserContext;
-import school.faang.user_service.dto.user.CreateUserDto;
 import school.faang.user_service.dto.user.UpdateUserDto;
 import school.faang.user_service.dto.user.UserDto;
 import school.faang.user_service.entity.goal.Goal;
 import school.faang.user_service.entity.user.Country;
 import school.faang.user_service.entity.user.User;
-import school.faang.user_service.exception.DataValidationException;
 import school.faang.user_service.exception.EntityNotFoundException;
 import school.faang.user_service.exception.ForbiddenException;
 import school.faang.user_service.kafka.producer.UserUpdateProducer;
@@ -22,7 +20,6 @@ import school.faang.user_service.repository.event.EventRepository;
 import school.faang.user_service.repository.goal.GoalRepository;
 import school.faang.user_service.repository.user.CountryRepository;
 import school.faang.user_service.repository.user.UserRepository;
-import school.faang.user_service.service.mentorship.MentorshipRequestService;
 
 import java.util.List;
 
@@ -40,20 +37,7 @@ public class UserServiceImpl implements UserService {
     private final UserUpdateProducer userUpdateProducer;
     private final GoalRepository goalRepository;
     private final EventRepository eventRepository;
-    private final MentorshipRequestService mentorshipRequestService;
 
-    @Override
-    public UserDto create(CreateUserDto userDto) {
-        if (userDto.password().length() < minPasswordLength) {
-            throw new DataValidationException("Password should be more than " + minPasswordLength + " symbols!");
-        }
-        User user = userMapper.toUser(userDto);
-        Country country = countryRepository.getByIdOrThrow(userDto.countryId());
-        user.setCountry(country);
-        user = userRepository.save(user);
-        log.info("User {} created", user.getId());
-        return userMapper.toUserDto(user);
-    }
 
     @Override
     public UserDto update(long requesterId, UpdateUserDto userDto) {
@@ -97,11 +81,6 @@ public class UserServiceImpl implements UserService {
     }
 
     @Override
-    public List<UserDto> getUsersByIds(List<Long> userIds) {
-        return userMapper.toUserDtos(userRepository.findAllById(userIds));
-    }
-
-    @Override
     public UserDetails loadUserByUsername(String username) throws UsernameNotFoundException {
         return userRepository.findByUsername(username)
                 .orElseThrow(() -> new UsernameNotFoundException("User not found"));
@@ -117,7 +96,6 @@ public class UserServiceImpl implements UserService {
         user.setActive(false);
 
         userRepository.save(user);
-        mentorshipRequestService.deactivateMentor(userId);
 
         log.info("User {} was deactivated", userId);
         return userMapper.toUserDto(user);

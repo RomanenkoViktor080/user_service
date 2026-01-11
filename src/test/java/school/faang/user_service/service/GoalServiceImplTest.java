@@ -19,12 +19,12 @@ import school.faang.user_service.dto.goal.CreateGoalDto;
 import school.faang.user_service.dto.goal.FilterGoalDto;
 import school.faang.user_service.dto.goal.GoalDto;
 import school.faang.user_service.dto.goal.UpdateGoalDto;
-import school.faang.user_service.entity.filter.goal.GoalFilterBuilderInterface;
 import school.faang.user_service.entity.goal.Goal;
 import school.faang.user_service.entity.goal.GoalStatus;
 import school.faang.user_service.entity.user.Skill;
 import school.faang.user_service.entity.user.User;
 import school.faang.user_service.entity.user.UserSkillGuarantee;
+import school.faang.user_service.filters.FilterBuilderInterface;
 import school.faang.user_service.kafka.producer.UserUpdateProducer;
 import school.faang.user_service.mapper.GoalMapper;
 import school.faang.user_service.mapper.SkillMapper;
@@ -87,7 +87,7 @@ public class GoalServiceImplTest {
     @Mock
     private GoalDeletePolicy goalDeletePolicy;
     @Mock
-    private GoalFilterBuilderInterface<Goal, FilterGoalDto> goalFilter;
+    private FilterBuilderInterface<Goal, FilterGoalDto> goalFilter;
     @Captor
     private ArgumentCaptor<Specification<Goal>> specCaptor;
     @Captor

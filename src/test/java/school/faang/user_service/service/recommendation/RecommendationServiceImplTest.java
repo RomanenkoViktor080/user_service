@@ -9,19 +9,15 @@ import org.mockito.Mock;
 import org.mockito.Mockito;
 import org.mockito.Spy;
 import org.mockito.junit.jupiter.MockitoExtension;
-import org.mockito.stubbing.Answer;
-import org.springframework.test.util.ReflectionTestUtils;
 import school.faang.user_service.config.context.UserContext;
 import school.faang.user_service.dto.event.RecommendationReceivedEventDto;
 import school.faang.user_service.dto.recommendation.CreateRecommendationDto;
 import school.faang.user_service.dto.recommendation.RecommendationDto;
-import school.faang.user_service.dto.recommendation.RecommendationFilterDto;
 import school.faang.user_service.dto.recommendation.UpdateRecommendationDto;
 import school.faang.user_service.entity.recommendation.Recommendation;
 import school.faang.user_service.entity.user.User;
 import school.faang.user_service.exception.EntityNotFoundException;
 import school.faang.user_service.exception.recommendation.AnotherAuthorException;
-import school.faang.user_service.filter.RecommendationFilter;
 import school.faang.user_service.mapper.RecommendationMapper;
 import school.faang.user_service.mapper.RecommendationMapperImpl;
 import school.faang.user_service.publisher.RecommendationReceivedEventPublisher;
@@ -32,7 +28,6 @@ import school.faang.user_service.validator.recommendation.RecommendationValidato
 import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Optional;
-import java.util.stream.Stream;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
@@ -64,12 +59,6 @@ class RecommendationServiceImplTest {
 
     @Mock
     private UserRepository userRepository;
-
-    @Mock
-    private RecommendationFilter filter1;
-
-    @Mock
-    private RecommendationFilter filter2;
 
     @Captor
     private ArgumentCaptor<RecommendationReceivedEventDto> recommendationReceivedEventCaptor;
@@ -185,7 +174,7 @@ class RecommendationServiceImplTest {
         doThrow(new RuntimeException("error")).when(recommendationValidator).validateDelete(recommendation);
 
         assertThrows(RuntimeException.class, () -> recommendationService.delete(recommendationId));
-        verify(recommendationRepository, Mockito.never()).deleteByIdAndAuthor_id(
+        verify(recommendationRepository, Mockito.never()).deleteByIdAndAuthorId(
                 recommendationId,
                 authorId
         );
@@ -201,80 +190,7 @@ class RecommendationServiceImplTest {
         recommendationService.delete(recommendationId);
 
         verify(recommendationRepository, Mockito.times(1))
-                .deleteByIdAndAuthor_id(recommendationId, recommendation.getAuthor().getId());
-    }
-
-    @Test
-    void getByFiltersReturnsAllIfNoFilters() {
-        List<Recommendation> allRecommendations = getListForFiltering();
-        List<RecommendationFilter> filters = List.of(filter1, filter2);
-        ReflectionTestUtils.setField(recommendationService, "recommendationFilters", filters);
-        when(recommendationRepository.findAll()).thenReturn(allRecommendations);
-        RecommendationFilterDto filterDto = new RecommendationFilterDto(null, null, null);
-
-        List<RecommendationDto> matchedRecommendations = recommendationService.getByFilters(filterDto);
-
-        assertEquals(matchedRecommendations.size(), allRecommendations.size());
-        assertEquals(matchedRecommendations.get(0).content(), allRecommendations.get(0).getContent());
-        assertEquals(matchedRecommendations.get(1).content(), allRecommendations.get(1).getContent());
-    }
-
-    @Test
-    void getByFiltersChecksApplicableFiltersAndApplies() {
-        List<Recommendation> allRecommendations = getListForFiltering();
-        List<RecommendationFilter> filters = List.of(filter1, filter2);
-        ReflectionTestUtils.setField(recommendationService, "recommendationFilters", filters);
-        when(recommendationRepository.findAll()).thenReturn(allRecommendations);
-        when(filter1.isApplicable(Mockito.any())).thenReturn(true);
-        when(filter2.isApplicable(Mockito.any())).thenReturn(true);
-        when(filter1.apply(Mockito.any(), Mockito.any())).thenReturn(allRecommendations.stream());
-        when(filter2.apply(Mockito.any(), Mockito.any())).thenReturn(allRecommendations.stream());
-        RecommendationFilterDto filterDto = new RecommendationFilterDto(null, null, null);
-
-        recommendationService.getByFilters(filterDto);
-
-        verify(filter1, Mockito.times(1)).isApplicable(Mockito.any());
-        verify(filter2, Mockito.times(1)).isApplicable(Mockito.any());
-        verify(filter1, Mockito.times(1)).apply(Mockito.any(), Mockito.any());
-        verify(filter2, Mockito.times(1)).apply(Mockito.any(), Mockito.any());
-    }
-
-    @Test
-    void getByFiltersFiltersOutResults() {
-        List<Recommendation> allRecommendations = getListForFiltering();
-        List<RecommendationFilter> filters = List.of(filter1);
-        ReflectionTestUtils.setField(recommendationService, "recommendationFilters", filters);
-        when(recommendationRepository.findAll()).thenReturn(allRecommendations);
-        RecommendationFilterDto filterDto = new RecommendationFilterDto(null, null, null);
-        when(filter1.isApplicable(Mockito.any())).thenReturn(true);
-        when(
-                filter1.apply(Mockito.any(), Mockito.any()))
-                .thenAnswer((Answer<Stream<Recommendation>>) invocation -> {
-                    Stream<Recommendation> recommendationStream = invocation.getArgument(0);
-                    return recommendationStream.filter(r -> false);
-                });
-
-        List<RecommendationDto> matchedRecommendations = recommendationService.getByFilters(filterDto);
-
-        verify(filter1, Mockito.times(1)).apply(Mockito.any(), Mockito.any());
-        assertEquals(0, matchedRecommendations.size());
-    }
-
-    @Test
-    void getByFiltersSkipsFiltersThatAreNotApplicable() {
-        List<Recommendation> allRecommendations = getListForFiltering();
-        List<RecommendationFilter> filters = List.of(filter1, filter2);
-        ReflectionTestUtils.setField(recommendationService, "recommendationFilters", filters);
-        when(recommendationRepository.findAll()).thenReturn(allRecommendations);
-        when(filter1.isApplicable(Mockito.any())).thenReturn(false);
-        when(filter2.isApplicable(Mockito.any())).thenReturn(true);
-        when(filter2.apply(Mockito.any(), Mockito.any())).thenReturn(allRecommendations.stream());
-
-        recommendationService.getByFilters(new RecommendationFilterDto(null, null, null));
-
-        verify(filter1, Mockito.times(1)).isApplicable(Mockito.any());
-        verify(filter1, Mockito.never()).apply(Mockito.any(), Mockito.any());
-        verify(filter2, Mockito.times(1)).apply(Mockito.any(), Mockito.any());
+                .deleteByIdAndAuthorId(recommendationId, recommendation.getAuthor().getId());
     }
 
     private Recommendation getRecommendation(long recommendationId, long authorId, long receiverId, String content) {

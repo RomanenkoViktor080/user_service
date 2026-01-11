@@ -4,6 +4,9 @@ import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
+import org.springdoc.core.annotations.ParameterObject;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.http.HttpStatus;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -18,9 +21,7 @@ import school.faang.user_service.dto.recommendation.CreateRecommendationRequestD
 import school.faang.user_service.dto.recommendation.RecommendationRequestDto;
 import school.faang.user_service.dto.recommendation.RecommendationRequestFilterDto;
 import school.faang.user_service.dto.recommendation.RejectionDto;
-import school.faang.user_service.service.recommendation.RecommendationRequestService;
-
-import java.util.List;
+import school.faang.user_service.service.recommendation_request.RecommendationRequestService;
 
 @Validated
 @RestController
@@ -49,15 +50,18 @@ public class RecommendationRequestController {
             description = "Retrieves a list of all submitted recommendation requests"
     )
     @GetMapping
-    public List<RecommendationRequestDto> getByFilters(@Valid RecommendationRequestFilterDto filters) {
-        return recommendationRequestService.getByFilters(filters);
+    public Page<RecommendationRequestDto> getByFilters(
+            @Valid @ParameterObject RecommendationRequestFilterDto filters,
+            @ParameterObject Pageable pageable
+    ) {
+        return recommendationRequestService.getByFilters(filters, pageable);
     }
 
     @Operation(
             summary = "Get a recommendation request by ID",
             description = "Returns detailed information about a specific recommendation request"
     )
-    @GetMapping("{id}")
+    @GetMapping("/{id}")
     public RecommendationRequestDto getById(@PathVariable long id) {
         return recommendationRequestService.getById(id);
     }
@@ -66,7 +70,7 @@ public class RecommendationRequestController {
             summary = "Accept a recommendation request",
             description = "Marks the specified recommendation request as accepted for processing"
     )
-    @PutMapping("{id}/accept")
+    @PutMapping("/{id}/accept")
     public void accept(long id) {
         recommendationRequestService.accept(id);
     }
@@ -75,7 +79,7 @@ public class RecommendationRequestController {
             summary = "Cancel a recommendation request",
             description = "Allows the user to cancel a previously submitted recommendation request"
     )
-    @PutMapping("{id}/reject")
+    @PutMapping("/{id}/reject")
     public void reject(long id, @Valid RejectionDto rejection) {
         recommendationRequestService.reject(id, rejection);
     }

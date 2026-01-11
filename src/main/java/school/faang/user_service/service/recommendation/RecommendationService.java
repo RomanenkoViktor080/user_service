@@ -1,6 +1,8 @@
 package school.faang.user_service.service.recommendation;
 
 import jakarta.transaction.Transactional;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import school.faang.user_service.dto.recommendation.CreateRecommendationDto;
 import school.faang.user_service.dto.recommendation.RecommendationDto;
 import school.faang.user_service.dto.recommendation.RecommendationFilterDto;
@@ -71,7 +73,7 @@ public interface RecommendationService {
      * @param filters объект содержащий фильтры для применения со значениями
      * @return список {@link List} рекомендаций, соответствующих фильтрам
      */
-    List<RecommendationDto> getByFilters(RecommendationFilterDto filters);
+    Page<RecommendationDto> getByFilters(RecommendationFilterDto filters, Pageable pageable);
 }
 
 

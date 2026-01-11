@@ -19,7 +19,6 @@ import school.faang.user_service.repository.event.EventRepository;
 import school.faang.user_service.repository.goal.GoalRepository;
 import school.faang.user_service.repository.user.CountryRepository;
 import school.faang.user_service.repository.user.UserRepository;
-import school.faang.user_service.service.mentorship.MentorshipRequestService;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -27,8 +26,6 @@ import java.util.Optional;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
-import static org.junit.jupiter.api.Assertions.assertNotNull;
-import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
@@ -46,8 +43,6 @@ public class UserServiceTest {
     private GoalRepository goalRepository;
     @Mock
     private EventRepository eventRepository;
-    @Mock
-    private MentorshipRequestService mentorshipRequestService;
     @InjectMocks
     public UserServiceImpl userService;
 
@@ -78,45 +73,6 @@ public class UserServiceTest {
         verify(userMapper).toUserDto(user);
     }
 
-    @Test
-    @DisplayName("Should get users from the list of IDs")
-    public void testGetUsersByIds() {
-        List<Long> userIds = List.of(USER_ID, USER_TWO_ID);
-        User userOne = createUser(USER_ID);
-        User userTwo = createUser(USER_TWO_ID);
-        List<User> users = List.of(userOne, userTwo);
-
-        when(userRepository.findAllById(userIds)).thenReturn(users);
-
-        List<UserDto> listDto = userService.getUsersByIds(userIds);
-        List<UserDto> result = List.of(createUserDto(USER_ID), createUserDto(USER_TWO_ID));
-
-        assertEquals(listDto, result);
-
-        verify(userMapper).toUserDto(userOne);
-        verify(userMapper).toUserDto(userTwo);
-    }
-
-    @Test
-    @DisplayName("Should create a new user")
-    public void testCreateUser() {
-        CreateUserDto createUserDto = createCreateDto();
-        User user = createUser(USER_ID);
-
-        when(userRepository.save(any(User.class))).thenReturn(user);
-        when(countryRepository.getByIdOrThrow(createUserDto.countryId())).thenReturn(createCountry());
-
-        UserDto result = userService.create(createUserDto);
-
-        assertNotNull(result);
-        assertEquals(USER_ID, result.id());
-        assertEquals(USER_NAME, result.username());
-        assertEquals(EMAIL, result.email());
-
-        verify(userMapper).toUser(createUserDto);
-        verify(userRepository).save(any(User.class));
-        verify(userMapper).toUserDto(user);
-    }
 
     @Test
     @DisplayName("Should delete user from goals")
@@ -165,7 +121,6 @@ public class UserServiceTest {
         when(userRepository.getByIdOrThrow(USER_ID)).thenReturn(user);
 
         userService.deactivateUserById(USER_ID);
-        verify(mentorshipRequestService).deactivateMentor(USER_ID);
     }
 
     private CreateUserDto createCreateDto() {

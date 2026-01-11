@@ -39,7 +39,7 @@ public class GoalController {
     )
     @GetMapping
     public ResponseEntity<Page<GoalDto>> getGoals(
-            @ParameterObject FilterGoalDto dto,
+            @Valid @ParameterObject FilterGoalDto dto,
             @ParameterObject Pageable pageable
     ) {
         return ResponseEntity

@@ -20,7 +20,7 @@
 * [ApiExceptionHandler.java](src/main/java/school/faang/user_service/controller/ApiExceptionHandler.java) - глобальная
   обработка ошибок
 * [BaseFilterBuilder.java](src/main/java/school/faang/user_service/entity/filter/BaseFilterBuilder.java) - абстрактный
-  билдер фильтров. Пример конкретной реализации - `src/main/java/school/faang/user_service/entity/filter/goal/*`.
+  билдер фильтров. Пример конкретной реализации - `src/main/java/school/faang/user_service/filters/goal/*`.
   Используется для быстрого создания фильтров сущности, с возможностью расширения, удобством использования.
 * `src/main/java/school/faang/user_service/entity` - JPA сущности
 * `src/main/java/school/faang/user_service/dto` - REST dto

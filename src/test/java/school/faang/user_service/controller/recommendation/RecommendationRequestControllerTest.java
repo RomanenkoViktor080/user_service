@@ -7,10 +7,8 @@ import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import school.faang.user_service.controller.recommendation_request.RecommendationRequestController;
 import school.faang.user_service.dto.recommendation.CreateRecommendationRequestDto;
-import school.faang.user_service.dto.recommendation.RecommendationRequestFilterDto;
 import school.faang.user_service.dto.recommendation.RejectionDto;
-import school.faang.user_service.entity.RequestStatus;
-import school.faang.user_service.service.recommendation.RecommendationRequestService;
+import school.faang.user_service.service.recommendation_request.RecommendationRequestService;
 
 import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
 
@@ -28,14 +26,6 @@ public class RecommendationRequestControllerTest {
                 new CreateRecommendationRequestDto("Сообщение", 1L);
 
         assertDoesNotThrow(() -> recommendationRequestService.create(requestDto));
-    }
-
-    @Test
-    void testGetByFilters() throws Exception {
-        RecommendationRequestFilterDto dto = new RecommendationRequestFilterDto(1L, 2L,
-                "Hello", RequestStatus.ACCEPTED);
-
-        assertDoesNotThrow(() -> recommendationRequestService.getByFilters(dto));
     }
 
     @Test

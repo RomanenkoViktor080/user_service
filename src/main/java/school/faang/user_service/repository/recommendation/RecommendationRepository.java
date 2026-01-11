@@ -1,6 +1,7 @@
 package school.faang.user_service.repository.recommendation;
 
 import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.data.jpa.repository.JpaSpecificationExecutor;
 import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.data.jpa.repository.Query;
 import school.faang.user_service.entity.recommendation.Recommendation;
@@ -8,7 +9,8 @@ import school.faang.user_service.entity.recommendation.Recommendation;
 import java.util.List;
 import java.util.Optional;
 
-public interface RecommendationRepository extends JpaRepository<Recommendation, Long> {
+public interface RecommendationRepository extends JpaRepository<Recommendation, Long>,
+        JpaSpecificationExecutor<Recommendation> {
 
     @Query(nativeQuery = true, value = """
             INSERT INTO recommendation (author_id, receiver_id, content)
@@ -24,7 +26,7 @@ public interface RecommendationRepository extends JpaRepository<Recommendation, 
     void update(long authorId, long receiverId, String content);
 
     @Modifying
-    int deleteByIdAndAuthor_id(long id, long authorId);
+    int deleteByIdAndAuthorId(long id, long authorId);
 
     List<Recommendation> findAllByReceiverId(long receiverId);
 

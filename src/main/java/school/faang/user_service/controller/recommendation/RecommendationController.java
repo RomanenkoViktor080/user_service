@@ -5,6 +5,8 @@ import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springdoc.core.annotations.ParameterObject;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -19,8 +21,6 @@ import school.faang.user_service.dto.recommendation.RecommendationDto;
 import school.faang.user_service.dto.recommendation.RecommendationFilterDto;
 import school.faang.user_service.dto.recommendation.UpdateRecommendationDto;
 import school.faang.user_service.service.recommendation.RecommendationService;
-
-import java.util.List;
 
 
 @Slf4j
@@ -50,8 +50,11 @@ public class RecommendationController {
     }
 
     @GetMapping
-    public List<RecommendationDto> getByFilters(@Valid @ParameterObject RecommendationFilterDto filters) {
-        return recommendationService.getByFilters(filters);
+    public Page<RecommendationDto> getByFilters(
+            @Valid @ParameterObject RecommendationFilterDto filters,
+            @ParameterObject Pageable pageable
+    ) {
+        return recommendationService.getByFilters(filters, pageable);
     }
 
 }

@@ -1,7 +1,8 @@
 package school.faang.user_service.dto.recommendation;
 
 public record RecommendationFilterDto(
-        String contentContains,
+        String content,
         Long authorId,
-        Long receiverId) {
+        Long receiverId
+) {
 }

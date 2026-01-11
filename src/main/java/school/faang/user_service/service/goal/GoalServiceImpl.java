@@ -14,12 +14,12 @@ import school.faang.user_service.dto.goal.CreateGoalDto;
 import school.faang.user_service.dto.goal.FilterGoalDto;
 import school.faang.user_service.dto.goal.GoalDto;
 import school.faang.user_service.dto.goal.UpdateGoalDto;
-import school.faang.user_service.entity.filter.goal.GoalFilterBuilderInterface;
 import school.faang.user_service.entity.goal.Goal;
 import school.faang.user_service.entity.goal.GoalStatus;
 import school.faang.user_service.entity.user.Skill;
 import school.faang.user_service.entity.user.User;
 import school.faang.user_service.entity.user.UserSkillGuarantee;
+import school.faang.user_service.filters.FilterBuilderInterface;
 import school.faang.user_service.kafka.producer.UserUpdateProducer;
 import school.faang.user_service.mapper.GoalMapper;
 import school.faang.user_service.mapper.SkillMapper;
@@ -48,7 +48,7 @@ public class GoalServiceImpl implements GoalService {
     private final UserRepository userRepository;
     private final SkillRepository skillRepository;
     private final UserSkillGuaranteeRepository userSkillGuaranteeRepository;
-    private final GoalFilterBuilderInterface<Goal, FilterGoalDto> goalFilter;
+    private final FilterBuilderInterface<Goal, FilterGoalDto> goalFilter;
     private final GoalCreatePolicy goalCreatePolicy;
     private final GoalUpdatePolicy goalUpdatePolicy;
     private final GoalDeletePolicy goalDeletePolicy;
@@ -149,7 +149,7 @@ public class GoalServiceImpl implements GoalService {
         long usersSize = goal.getUsers().size();
         long currentUserId = authUserContext.getUserId();
         boolean isMentor = goal.getMentor() != null
-                           && goal.getMentor().getId().equals(currentUserId);
+                && goal.getMentor().getId().equals(currentUserId);
         if (isMentor || usersSize <= MIN_USERS_TO_DELETE_GOAL) {
             goalRepository.deleteById(id);
         } else {
